@@ -1,0 +1,12 @@
+.app {
+  text-align: center;
+}
+
+.newsList {
+  margin-top: 20px;
+}
+
+.newsItem {
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+}

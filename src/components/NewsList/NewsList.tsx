@@ -1,207 +1,327 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-// import NewsItem from "./NewsItem";
-import { fetchNews } from "../../api/gdeltApi";
-import { NewsItemType } from "../../types";
-// import styles from "../../styles/NewsList.module.css";
+// import {
+//   useCallback,
+//   useEffect,
+//   useLayoutEffect,
+//   useMemo,
+//   useRef,
+//   useState,
+// } from "react";
+// // import NewsItem from "./NewsItem";
+// import { fetchNews } from "../../api/gdeltApi";
+// import { NewsItemType } from "../../types";
+// // import styles from "../../styles/NewsList.module.css";
 
-interface UseFixedSizeListProps {
-  loading: boolean;
-  itemsCount: number;
-  itemHeight: number;
-  listHeight: number;
-  overscan?: number;
-  scrollingDelay?: number;
-  getScrollElement: () => HTMLElement | null;
-}
+// type Key = string | number;
 
-const DEFAULT_OVERSCAN = 3;
-const DEFAULT_SCROLLING_DELAY = 150;
+// interface UseDynamicSizeListProps {
+//   loading?: boolean;
+//   itemsCount: number;
+//   itemHeight?: (index: number) => number;
+//   estimateItemHeight?: (index: number) => number;
+//   getItemKey: (index: number) => Key;
+//   overscan?: number;
+//   scrollingDelay?: number;
+//   getScrollElement: () => HTMLElement | null;
+// }
 
-function useFixedSizeList(props: UseFixedSizeListProps) {
-  const {
-    loading,
-    itemHeight,
-    itemsCount,
-    scrollingDelay = DEFAULT_SCROLLING_DELAY,
-    overscan = DEFAULT_OVERSCAN,
-    listHeight,
-    getScrollElement,
-  } = props;
+// interface DynamicSizeListItem {
+//   key: Key;
+//   index: number;
+//   offsetTop: number;
+//   height: number;
+// }
 
-  const [scrollTop, setScrollTop] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
+// const DEFAULT_OVERSCAN = 3;
+// const DEFAULT_SCROLLING_DELAY = 150;
 
-  useLayoutEffect(() => {
-    if (loading) return;
-    const scrollElement = getScrollElement();
+// function validateProps(props: UseDynamicSizeListProps) {
+//   const { itemHeight, estimateItemHeight } = props;
 
-    if (!scrollElement) {
-      return;
-    }
+//   if (!itemHeight && !estimateItemHeight) {
+//     throw new Error(
+//       `you must pass either "itemHeight" or "estimateItemHeight" prop`
+//     );
+//   }
+// }
 
-    const handleScroll = () => {
-      const scrollTop = scrollElement.scrollTop;
+// function useDynamicSizeList(props: UseDynamicSizeListProps) {
+//   validateProps(props);
+//   const {
+//     loading,
+//     itemHeight,
+//     estimateItemHeight,
+//     getItemKey,
+//     itemsCount,
+//     scrollingDelay = DEFAULT_SCROLLING_DELAY,
+//     overscan = DEFAULT_OVERSCAN,
+//     // listHeight,
+//     getScrollElement,
+//   } = props;
 
-      setScrollTop(scrollTop);
-    };
+//   const [measurementCache, setMeasurementCache] = useState<Record<Key, number>>(
+//     {}
+//   );
 
-    handleScroll();
+//   const [listHeight, setListHeight] = useState(0);
+//   const [scrollTop, setScrollTop] = useState(0);
+//   const [isScrolling, setIsScrolling] = useState(false);
 
-    scrollElement.addEventListener("scroll", handleScroll);
+//   useLayoutEffect(() => {
+//     if (loading) return;
+//     const scrollElement = getScrollElement();
 
-    return () => scrollElement.removeEventListener("scroll", handleScroll);
-  }, [getScrollElement, loading]);
+//     if (!scrollElement) {
+//       return;
+//     }
 
-  useEffect(() => {
-    if (loading) return;
-    const scrollElement = getScrollElement();
+//     const resizeObserver = new ResizeObserver(([entry]) => {
+//       if (!entry) {
+//         return;
+//       }
+//       const height =
+//         entry.borderBoxSize[0]?.blockSize ??
+//         entry.target.getBoundingClientRect().height;
 
-    if (!scrollElement) {
-      return;
-    }
+//       setListHeight(height);
+//     });
 
-    let timeoutId: number | null = null;
+//     resizeObserver.observe(scrollElement);
 
-    const handleScroll = () => {
-      setIsScrolling(true);
+//     return () => {
+//       resizeObserver.disconnect();
+//     };
+//   }, [getScrollElement, loading]);
 
-      if (typeof timeoutId === "number") {
-        clearTimeout(timeoutId);
-      }
+//   useLayoutEffect(() => {
+//     if (loading) return;
+//     const scrollElement = getScrollElement();
 
-      timeoutId = setTimeout(() => {
-        setIsScrolling(false);
-      }, scrollingDelay);
-    };
+//     if (!scrollElement) {
+//       return;
+//     }
 
-    scrollElement.addEventListener("scroll", handleScroll);
+//     const handleScroll = () => {
+//       const scrollTop = scrollElement.scrollTop;
 
-    return () => {
-      if (typeof timeoutId === "number") {
-        clearTimeout(timeoutId);
-      }
-      scrollElement.removeEventListener("scroll", handleScroll);
-    };
-  }, [getScrollElement, loading, scrollingDelay]);
+//       setScrollTop(scrollTop);
+//     };
 
-  const { virtualItems, startIndex, endIndex } = useMemo(() => {
-    const rangeStart = scrollTop;
-    const rangeEnd = scrollTop + listHeight;
+//     handleScroll();
 
-    let startIndex = Math.floor(rangeStart / itemHeight);
-    let endIndex = Math.ceil(rangeEnd / itemHeight);
+//     scrollElement.addEventListener("scroll", handleScroll);
 
-    startIndex = Math.max(0, startIndex - overscan);
-    endIndex = Math.min(itemsCount - 1, endIndex + overscan);
+//     return () => scrollElement.removeEventListener("scroll", handleScroll);
+//   }, [getScrollElement, loading]);
 
-    const virtualItems = [];
+//   useEffect(() => {
+//     if (loading) return;
+//     const scrollElement = getScrollElement();
 
-    for (let index = startIndex; index <= endIndex; index++) {
-      virtualItems.push({
-        index,
-        offsetTop: index * itemHeight,
-      });
-    }
-    return { virtualItems, startIndex, endIndex };
-  }, [scrollTop, listHeight, itemsCount]);
+//     if (!scrollElement) {
+//       return;
+//     }
 
-  const totalHeight = itemHeight * itemsCount;
+//     let timeoutId: number | null = null;
 
-  return {
-    virtualItems,
-    totalHeight,
-    startIndex,
-    endIndex,
-    isScrolling,
-  };
-}
+//     const handleScroll = () => {
+//       setIsScrolling(true);
 
-const itemHeight = 50;
-const containerHeight = 600;
+//       if (typeof timeoutId === "number") {
+//         clearTimeout(timeoutId);
+//       }
 
-const NewsList: React.FC = () => {
-  const [news, setNews] = useState<NewsItemType[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+//       timeoutId = setTimeout(() => {
+//         setIsScrolling(false);
+//       }, scrollingDelay);
+//     };
 
-  const scrollElementRef = useRef<HTMLDivElement>(null);
+//     scrollElement.addEventListener("scroll", handleScroll);
 
-  useEffect(() => {
-    const loadNews = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchNews();
-        setNews(data);
-      } catch (error) {
-        console.error("Failed to load news:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+//     return () => {
+//       if (typeof timeoutId === "number") {
+//         clearTimeout(timeoutId);
+//       }
+//       scrollElement.removeEventListener("scroll", handleScroll);
+//     };
+//   }, [getScrollElement, loading, scrollingDelay]);
 
-    loadNews();
-  }, []);
+//   const { virtualItems, startIndex, endIndex, totalHeight, allItems } =
+//     useMemo(() => {
+//       const getItemHeight = (index: number) => {
+//         if (itemHeight) {
+//           return itemHeight(index);
+//         }
 
-  const { isScrolling, virtualItems, totalHeight } = useFixedSizeList({
-    loading: loading,
-    itemHeight: itemHeight,
-    itemsCount: news.length,
-    listHeight: containerHeight,
-    getScrollElement: useCallback(() => scrollElementRef.current, []),
-  });
+//         const key = getItemKey(index);
+//         if (typeof measurementCache[key] === "number") {
+//           return measurementCache[key]!;
+//         }
 
-  if (loading) return <p>Loading...</p>;
+//         return estimateItemHeight!(index);
+//       };
 
-  return (
-    <div
-      ref={scrollElementRef}
-      style={{
-        height: containerHeight,
-        overflow: "auto",
-        border: "1px solid lightgrey",
-        position: "relative",
-      }}
-    >
-      <div
-        style={{
-          height: totalHeight,
-        }}
-      >
-        {virtualItems.map((virtualItem) => {
-          const item = news[virtualItem.index]!;
-          return (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                transform: `translateY(${virtualItem.offsetTop}px)`,
-                height: itemHeight,
-                padding: "6px 12px",
-              }}
-              key={virtualItem.index}
-            >
-              {isScrolling ? (
-                "Scrolling"
-              ) : (
-                <>
-                  {virtualItem.index}.
-                  <span>
-                    Источник: {item.domain}, {item.sourcecountry}
-                  </span>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+//       const rangeStart = scrollTop;
+//       const rangeEnd = scrollTop + listHeight;
 
-export default NewsList;
+//       let totalHeight = 0;
+//       let startIndex = -1;
+//       let endIndex = -1;
+//       const allRows: DynamicSizeListItem[] = Array(itemsCount);
+
+//       for (let index = 0; index < itemsCount; index++) {
+//         const key = getItemKey(index);
+//         const row = {
+//           key,
+//           index: index,
+//           height: getItemHeight(index),
+//           offsetTop: totalHeight,
+//         };
+
+//         totalHeight += row.height;
+//         allRows[index] = row;
+
+//         if (startIndex === -1 && row.offsetTop + row.height > rangeStart) {
+//           startIndex = Math.max(0, index - overscan);
+//         }
+
+//         if (endIndex === -1 && row.offsetTop + row.height >= rangeEnd) {
+//           endIndex = Math.min(itemsCount - 1, index + overscan);
+//         }
+//       }
+
+//       const virtualRows = allRows.slice(startIndex, endIndex + 1);
+
+//       return {
+//         virtualItems: virtualRows,
+//         startIndex,
+//         endIndex,
+//         allItems: allRows,
+//         totalHeight,
+//       };
+//     }, [
+//       scrollTop,
+//       overscan,
+//       listHeight,
+//       itemHeight,
+//       getItemKey,
+//       estimateItemHeight,
+//       measurementCache,
+//       itemsCount,
+//     ]);
+
+//   const measureElement = useCallback(
+//     (element: Element | null) => {
+//       if (!element) {
+//         return;
+//       }
+
+//       const indexAttribute = element.getAttribute("data-index") || "";
+//       const index = parseInt(indexAttribute, 10);
+
+//       if (Number.isNaN(index)) {
+//         console.error(
+//           "dynamic elements must have a valid `data-index` attribute"
+//         );
+//         return;
+//       }
+
+//       const size = element.getBoundingClientRect();
+//       const key = getItemKey(index);
+
+//       setMeasurementCache((cache) => ({ ...cache, [key]: size.height }));
+//     },
+//     [getItemKey]
+//   );
+
+//   return {
+//     virtualItems,
+//     totalHeight,
+//     startIndex,
+//     endIndex,
+//     isScrolling,
+//     allItems,
+//     measureElement,
+//   };
+// }
+
+// const containerHeight = 600;
+
+// const NewsList = () => {
+//   const [news, setNews] = useState<NewsItemType[]>([]);
+//   const [loading, setLoading] = useState<boolean>(true);
+
+//   const scrollElementRef = useRef<HTMLDivElement>(null);
+
+//   useEffect(() => {
+//     const loadNews = async () => {
+//       setLoading(true);
+//       try {
+//         const data = await fetchNews();
+//         // Добавляем уникальный идентификатор на основе index
+//         const newsWithId = data.articles.map((article: NewsItemType) => ({
+//           ...article,
+//           id: Math.random().toString(36).slice(2), // Используем комбинацию domain и индекса
+//         }));
+//         setNews(newsWithId);
+//       } catch (error) {
+//         console.error("Failed to load news:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     loadNews();
+//   }, []);
+
+//   const { virtualItems, totalHeight, measureElement } = useDynamicSizeList({
+//     estimateItemHeight: useCallback(() => 16, []),
+//     itemsCount: news.length,
+//     getScrollElement: useCallback(() => scrollElementRef.current, []),
+//     getItemKey: useCallback((index) => news[index]!.id, [news]), // Используем индекс как ключ
+//   });
+
+//   if (loading) return <p>Loading...</p>;
+
+//   return (
+//     <div
+//       ref={scrollElementRef}
+//       style={{
+//         height: containerHeight,
+//         overflow: "auto",
+//         border: "1px solid lightgrey",
+//         position: "relative",
+//       }}
+//     >
+//       <div
+//         style={{
+//           height: totalHeight,
+//         }}
+//       >
+//         {virtualItems.map((virtualItem) => {
+//           const item = news[virtualItem.index]!;
+
+//           return (
+//             <div
+//               data-index={virtualItem.index}
+//               ref={measureElement}
+//               style={{
+//                 position: "absolute",
+//                 top: 0,
+//                 transform: `translateY(${virtualItem.offsetTop}px)`,
+//                 padding: "6px 12px",
+//               }}
+//               key={virtualItem.index} // Теперь используем индекс как ключ
+//             >
+//               {virtualItem.index}.
+//               <span>
+//                 Источник: {item.domain}, {item.sourcecountry}
+//               </span>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default NewsList;

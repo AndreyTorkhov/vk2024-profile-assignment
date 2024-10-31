@@ -1,5 +1,4 @@
-export interface NewsItemType {
-  title: string;
-  domain: string;
-  sourcecountry: string;
+export interface ListItem {
+  id: number;
+  text: string;
 }

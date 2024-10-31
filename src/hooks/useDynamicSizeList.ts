@@ -13,7 +13,7 @@ const DEFAULT_SCROLLING_DELAY = 150;
 
 type Key = string | number;
 
-interface DynamicSizeListItem {
+export interface DynamicSizeListItem {
   key: Key;
   index: number;
   offsetTop: number;

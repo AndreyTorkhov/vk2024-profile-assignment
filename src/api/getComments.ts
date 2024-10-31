@@ -1,15 +1,13 @@
 import axios from "axios";
 import { ListItem } from "../types";
 
-export const fetchItems = async (page = 1, limit = 50): Promise<ListItem[]> => {
-  const response = await axios.get(
-    "https://jsonplaceholder.typicode.com/comments",
-    {
-      params: { _page: page, _limit: limit },
-    }
-  );
-  return response.data.map((item: { id: number; body: string }) => ({
+export const fetchItems = async (page = 1): Promise<ListItem[]> => {
+  const response = await axios.get(`https://api.github.com/orgs/github/repos`, {
+    params: { page },
+  });
+
+  return response.data.map((item: { id: number; name: string }) => ({
     id: item.id,
-    text: item.body,
+    text: item.name,
   }));
 };

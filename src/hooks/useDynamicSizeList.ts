@@ -6,19 +6,11 @@ import {
   useState,
 } from "react";
 
+import { DynamicSizeListItem, Key } from "../types";
 import { useLatest } from "./useLatest";
 
-const DEFAULT_OVERSCAN = 3;
+const DEFAULT_OVERSCAN = 2;
 const DEFAULT_SCROLLING_DELAY = 150;
-
-type Key = string | number;
-
-export interface DynamicSizeListItem {
-  key: Key;
-  index: number;
-  offsetTop: number;
-  height: number;
-}
 
 interface UseDynamicSizeListProps {
   itemsCount: number;
@@ -112,7 +104,7 @@ export function useDynamicSizeList(props: UseDynamicSizeListProps) {
       return;
     }
 
-    let timeoutId: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
       setIsScrolling(true);

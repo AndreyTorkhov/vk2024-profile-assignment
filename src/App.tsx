@@ -4,7 +4,7 @@ import { DynamicHeight } from "./page/MainPage";
 
 const App: React.FC = () => (
   <div className={styles.app}>
-    <h1>Комментарии</h1>
+    <h1>GitHub List</h1>
     <DynamicHeight />
   </div>
 );

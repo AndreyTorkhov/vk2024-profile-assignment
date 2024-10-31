@@ -1,50 +1,60 @@
-# React + TypeScript + Vite
+# Проект: Virtual Scroll
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Описание
 
-Currently, two official plugins are available:
+Этот проект реализует виртуализированный список с бесконечной прокруткой, построенный с использованием современных технологий React, MobX и TypeScript. При достижении конца видимого списка автоматически подгружаются новые элементы с другой страницы из внешнего API (например, GitHub API).
+`На странице отображается только часть карточек из списка.`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Технологии
 
-## Expanding the ESLint configuration
+- **React** — библиотека для построения пользовательских интерфейсов.
+- **TypeScript** — типизация, обеспечивающая более строгий контроль кода.
+- **MobX** — управление состоянием приложения.
+- **Axios** — для выполнения запросов к API.
+- **bootstrap** — UI библиотека.
+- **Vite** — это инструмент для сборки современных веб-приложений.
+- **Jest** и **React Testing Library** — для написания и выполнения тестов.
+- **CSS Modules** — для модульного стилирования компонентов.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Функционал
 
-- Configure the top-level `parserOptions` property like this:
+- **Виртуализация списка** — отображаются только те элементы, которые находятся в области видимости, что снижает нагрузку на память и ускоряет работу.
+- **Бесконечная прокрутка** — при достижении конца списка подгружаются новые элементы.
+- **Обновление карточек** — карточки можно изменять и удалять локально.
+- **Тестирование** — написаны юнит-тесты для основного функционала.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Установка и запуск
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Предварительные требования
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- **Node.js** версии 14 или выше
+- **yarn** для управления зависимостями
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+### Установка
+
+1. Клонируйте репозиторий:
+
+   ```bash
+   git clone https://github.com/AndreyTorkhov/vk2024-profile-assignment.git
+   cd vk2024-profile-assignment
+   ```
+
+2. Установите зависимости:
+
+   ```bash
+   yarn install
+   ```
+
+### Запуск
+
+1. Для запуска проекта в режиме разработки используйте команду::
+
+   ```bash
+   yarn dev
+   ```
+
+2. Для запуска всех тестов используйте команду:
+
+   ```bash
+   yarn test
+   ```

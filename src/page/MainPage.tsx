@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
-
 import { commentStore } from "../store";
 import CommentsList from "../components/CommentsList";
 

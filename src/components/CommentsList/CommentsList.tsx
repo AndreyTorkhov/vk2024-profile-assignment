@@ -1,10 +1,10 @@
-import { useCallback, useRef } from "react";
-import { commentStore } from "../../store";
+import React, { useCallback, useRef } from "react";
 import { observer } from "mobx-react-lite";
+import { commentStore } from "../../store";
 import { useDynamicSizeList } from "../../hooks/useDynamicSizeList";
 import { useScrollPagination } from "../../hooks/useScrollPagination";
-import styles from "./CommentsList.module.css";
 import CommentCard from "../CommentCard";
+import styles from "./CommentsList.module.css";
 
 const CommentsList = observer(() => {
   const scrollElementRef = useRef<HTMLDivElement>(null);
@@ -46,6 +46,9 @@ const CommentsList = observer(() => {
             />
           );
         })}
+        {!commentStore.hasMore && (
+          <div className={styles.endOfList}>End of list</div>
+        )}
       </div>
     </div>
   );

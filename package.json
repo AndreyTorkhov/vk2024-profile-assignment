@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.1.0",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "mobx": "^6.13.5",

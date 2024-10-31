@@ -1,29 +1,24 @@
-// import { faker } from "@faker-js/faker";
 import {
   useCallback,
   useEffect,
-  useInsertionEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
-import { fetchItems } from "../api/gdeltApi";
 
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useLatest } from "./useLatest";
 
-// import styles from "../styles/CommentCard.module.css";
-
-// const createItems = () =>
-//   Array.from({ length: 50 }, (_) => ({
-//     id: Math.random().toString(36).slice(2),
-//     text: faker.lorem.paragraphs({
-//       min: 3,
-//       max: 6,
-//     }),
-//   }));
+const DEFAULT_OVERSCAN = 3;
+const DEFAULT_SCROLLING_DELAY = 150;
 
 type Key = string | number;
+
+interface DynamicSizeListItem {
+  key: Key;
+  index: number;
+  offsetTop: number;
+  height: number;
+}
 
 interface UseDynamicSizeListProps {
   itemsCount: number;
@@ -35,16 +30,6 @@ interface UseDynamicSizeListProps {
   getScrollElement: () => HTMLElement | null;
 }
 
-interface DynamicSizeListItem {
-  key: Key;
-  index: number;
-  offsetTop: number;
-  height: number;
-}
-
-const DEFAULT_OVERSCAN = 3;
-const DEFAULT_SCROLLING_DELAY = 150;
-
 function validateProps(props: UseDynamicSizeListProps) {
   const { itemHeight, estimateItemHeight } = props;
 
@@ -55,15 +40,7 @@ function validateProps(props: UseDynamicSizeListProps) {
   }
 }
 
-function useLatest<T>(value: T) {
-  const valueRef = useRef(value);
-  useInsertionEffect(() => {
-    valueRef.current = value;
-  });
-  return valueRef;
-}
-
-function useDynamicSizeList(props: UseDynamicSizeListProps) {
+export function useDynamicSizeList(props: UseDynamicSizeListProps) {
   validateProps(props);
 
   const {
@@ -315,107 +292,4 @@ function useDynamicSizeList(props: UseDynamicSizeListProps) {
     allItems,
     measureElement,
   };
-}
-
-const containerHeight = 600;
-
-interface ListItem {
-  id: number;
-  text: string;
-}
-
-export function DynamicHeight() {
-  const [listItems, setListItems] = useState<ListItem[]>([]);
-  const scrollElementRef = useRef<HTMLDivElement>(null);
-  const [page, setPage] = useState<number>(1);
-
-  useEffect(() => {
-    const loadItems = async () => {
-      const newItems = await fetchItems(page, 50);
-      setListItems(newItems);
-    };
-    loadItems();
-  }, [page]);
-
-  const handleScroll = () => {
-    const element = scrollElementRef.current;
-    if (element) {
-      if (element.scrollHeight - element.scrollTop === element.clientHeight) {
-        setPage((prevPage) => prevPage + 1);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const element = scrollElementRef.current;
-    element?.addEventListener("scroll", handleScroll);
-    return () => element?.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const { virtualItems, totalHeight, measureElement } = useDynamicSizeList({
-    estimateItemHeight: useCallback(() => 100, []),
-    itemsCount: listItems.length,
-    getScrollElement: useCallback(() => scrollElementRef.current, []),
-    getItemKey: useCallback(
-      (index) => listItems[index]?.id ?? index,
-      [listItems]
-    ),
-  });
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>Comments</h1>
-      <div
-        ref={scrollElementRef}
-        style={{
-          height: containerHeight,
-          overflow: "auto",
-          border: "1px solid lightgrey",
-          position: "relative",
-        }}
-      >
-        <div style={{ height: totalHeight, position: "relative" }}>
-          {virtualItems.map((virtualItem, index) => {
-            const item = listItems[virtualItem.index];
-            return (
-              <div
-                key={`${item?.id}-${index}`}
-                data-index={virtualItem.index}
-                ref={measureElement}
-                className="card mb-3 shadow-sm"
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  top: 0,
-                  transform: `translateY(${virtualItem.offsetTop}px)`,
-                }}
-              >
-                <div className="card-body">
-                  <h5 className="card-title">Comment {item?.id}</h5>
-                  <p className="card-text">{item?.text}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      {/* Пагинация */}
-      <div className="mt-3 d-flex justify-content-center">
-        <button
-          className="btn btn-outline-primary mx-2"
-          disabled={page === 1}
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-        >
-          Previous
-        </button>
-        <span>Page {page}</span>
-        <button
-          className="btn btn-outline-primary mx-2"
-          onClick={() => setPage((prev) => prev + 1)}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
 }
